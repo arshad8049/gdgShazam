@@ -1,0 +1,16 @@
+# Virtual environment
+venv/
+
+# VS Code
+.vscode/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Environment files and secrets
+.env
+keys/
+
+# Misc
+.DS_Store
