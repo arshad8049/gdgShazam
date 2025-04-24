@@ -19,19 +19,28 @@ def callback(message: pubsub_v1.subscriber.message.Message):
     # 1) Mark RUNNING
     doc_ref = firestore_client.collection("jobs").document(job_id)
     doc_ref.update({"status": "RUNNING"})
+    print(f"[DEBUG] Received job {job_id} with URI {gcs_uri}")
 
-    # 2) Transcribe
-    audio = {"uri": gcs_uri}
-    config = {
-        "encoding": speech.RecognitionConfig.AudioEncoding.LINEAR16,
-        "language_code": "en-US",
-        "enable_automatic_punctuation": True
-    }
-    operation = speech_client.long_running_recognize(config=config, audio=audio)
+    # 2) Transcribe with MP3 encoding
+    config = speech.RecognitionConfig(
+        encoding=speech.RecognitionConfig.AudioEncoding.MP3,
+        sample_rate_hertz=44100,
+        language_code="en-US",
+        enable_automatic_punctuation=True
+    )
+    audio = speech.RecognitionAudio(uri=gcs_uri)
+    operation = speech_client.long_running_recognize(
+        config=config,
+        audio=audio
+    )
     response = operation.result(timeout=300)
+    print(f"[DEBUG] Got {len(response.results)} results for job {job_id}")
+    for i, res in enumerate(response.results):
+        print(f"[DEBUG] Result {i}: {res.alternatives[0].transcript[:100]!r}")
 
     # 3) Assemble transcript
     transcript = "\n".join(r.alternatives[0].transcript for r in response.results)
+    print(f"[DEBUG] Final transcript (first 200 chars): {transcript[:200]!r}")
 
     # 4) Write back transcript & complete status
     doc_ref.update({
