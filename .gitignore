@@ -15,3 +15,6 @@ keys/
 # Misc
 .DS_Store
 testAudio.mp3
+# service-account keys
+*.json
+keys/
