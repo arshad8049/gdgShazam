@@ -17,4 +17,4 @@ keys/
 testAudio.mp3
 # service-account keys
 *.json
-keys/
+keys/audio-backend-key.json
